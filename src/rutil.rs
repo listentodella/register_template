@@ -1,4 +1,5 @@
-use core::{fmt, marker::PhantomData};
+pub use core::{fmt, marker::PhantomData};
+pub use paste::paste;
 
 pub type RegisterBank = u8;
 pub const BANK0: RegisterBank = 0x00;
@@ -40,8 +41,8 @@ impl<'b, BUS, const BANK: RegisterBank> Registers<'b, BUS, BANK> {
 /// You can get an instance for a given register using one of the methods on
 /// [`Registers`].
 pub struct RegAccessor<'s, 'b, R, BUS, const BANK: RegisterBank>(
-    &'s Registers<'b, BUS, BANK>,
-    PhantomData<R>,
+    pub &'s Registers<'b, BUS, BANK>,
+    pub PhantomData<R>,
 );
 
 /// Implemented for all registers
@@ -90,6 +91,8 @@ pub trait Writable {
 }
 
 /// Generates register implementations
+#[macro_export]
+// #[macro_use]
 macro_rules! impl_register {
     (
         $bank: ident,
@@ -143,7 +146,7 @@ macro_rules! impl_register {
                                 #[$field_doc]
                                 pub fn $field(&self) -> $ty {
                                     use core::mem::size_of;
-                                    use crate::register_bank::FromBytes;
+                                    use crate::rutil::FromBytes;
 
                                     // The index (in the register data) of the first
                                     // byte that contains a part of this field.
@@ -255,7 +258,7 @@ macro_rules! impl_register {
                             $(
                                 #[$field_doc]
                                 pub fn $field(&mut self, value: $ty) -> &mut Self {
-                                    use crate::register_bank::ToBytes;
+                                    use crate::rutil::ToBytes;
 
                                     // Convert value into bytes
                                     let source = <$ty as ToBytes>::to_bytes(value);
@@ -387,6 +390,7 @@ macro_rules! impl_register {
 }
 
 // Helper macro, used internally by `impl_register!`
+#[macro_export]
 macro_rules! impl_rw {
     (RO, $name:ident, $name_lower:ident, $len:expr) => {
         impl_rw!(@R, $name, $name_lower, $len);
@@ -424,16 +428,17 @@ macro_rules! impl_rw {
     };
 }
 
-trait FromBytes {
+pub trait FromBytes {
     fn from_bytes(bytes: &[u8]) -> Self;
 }
 
-trait ToBytes {
+pub trait ToBytes {
     type Bytes;
     fn to_bytes(self) -> Self::Bytes;
 }
 
 /// Internal macro used to implement `FromBytes`/`ToBytes`
+#[macro_export]
 macro_rules! impl_bytes {
     ($($ty:ty,)*) => {
         $(
