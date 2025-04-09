@@ -11,7 +11,7 @@ impl_register! {
         value, 0, 7, u8;/// Revision ID value
     }
     0x02, 1, RW, CTRL(ctrl) {/// Control register
-        test1, 0, 0, u8;/// Enable bit
+        test1, 0, 0, u8;/// Enable bit<br>0 - disable<br>1 - enable
         test2, 1, 3, u8;/// Mode bits
         test3, 4, 5, u8;/// Interrupt enable bit
         test4, 6, 6, u8;/// Reset bit
