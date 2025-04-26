@@ -17,4 +17,8 @@ impl_register! {
         test4, 6, 6, u8;/// Reset bit
         test5, 7, 7, u8;/// Reserved bits
     }
+     0x01, 2, RW, ALL(all) {/// all in one register
+        rev_id, 0, 7, u8;/// revision id register
+        ctrl, 8, 15, u8;/// Control register
+    }
 }
